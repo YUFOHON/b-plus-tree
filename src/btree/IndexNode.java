@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
  class IndexNode extends MandyTree.Node {
+
     private List<MandyTree.Node> pointers; // List of pointers to child nodes
 
     public IndexNode() {
@@ -31,6 +32,9 @@ import java.util.List;
         return keys.size();
     }
 
+     public void setKeys(List<Integer> keys) {
+         this.keys = new ArrayList<>(keys);
+     }
     @Override
     public boolean insertKey(Integer key) {
         int index = 0;
@@ -70,7 +74,11 @@ import java.util.List;
         return new ArrayList<>(keys);
     }
 
-    @Override
+     public List<MandyTree.Node> getAllPointer() {
+         return new ArrayList<>(pointers);
+     }
+
+     @Override
     public MandyTree.Node getChild(int index) {
         if (index >= 0 && index < pointers.size()) {
             return pointers.get(index);
@@ -87,6 +95,11 @@ import java.util.List;
         }
     }
 
+
+
+     public void setPointers(List<MandyTree.Node> pointers) {
+        this.pointers=pointers;
+     }
     /**
      * Given a pointer to a Node object and an integer index, this method
      * inserts the pointer at the specified index within the childPointers

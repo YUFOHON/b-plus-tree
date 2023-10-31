@@ -105,10 +105,36 @@ public class MandyTree implements BTree {
                     parent.setChild(insertionIndex, newLeafNode);
                     newLeafNode.setParent(parent);
                     // Handle potential overflow of the parent index node
-                    while(parent!=null && parent.isOverflow(this.DEGREE)) {
-//                        splitIndexNode(parent);
+                    while(parent!=null&&parent.isOverflow(this.DEGREE)) {
                         System.out.println("parent overflow");
-                        parent = (IndexNode) parent.getParent();
+                        int splitIndex = parent.getAllKeys().size() / 2;
+                        int tempKey=parent.getAllKeys().get(splitIndex);
+                        IndexNode[] indexNodeArray = splitIndexNode(parent);
+                        if(parent.getParent()==null){
+                            IndexNode newRootNode=new IndexNode();
+                            newRootNode.insertKey(tempKey);
+                            indexNodeArray[0].setParent(newRootNode);
+                            indexNodeArray[1].setParent(newRootNode);
+                            newRootNode.setChild(0,indexNodeArray[0]);
+                            newRootNode.setChild(1,indexNodeArray[1]);
+                            root=newRootNode;
+                            break;
+                        }else{
+                            IndexNode grandParent= (IndexNode) parent.getParent();
+                            grandParent.insertKey(tempKey);
+                            indexNodeArray[0].setParent(grandParent);
+                            indexNodeArray[1].setParent(grandParent);
+                            int index=grandParent.getAllKeys().size();
+                            grandParent.setChild(index-1,indexNodeArray[0]);
+                            grandParent.setChild(index,indexNodeArray[1]);
+
+                            parent = (IndexNode) parent.getParent();
+                        }
+
+
+
+
+
                     }
                 }
             } else {
@@ -119,9 +145,34 @@ public class MandyTree implements BTree {
         }
 
     }
-//    private IndexNode splitIndexNode(IndexNode parent){
-//        parent.
-//    }
+    private IndexNode[] splitIndexNode(IndexNode indexNode) {
+        // Create a new leaf node
+        IndexNode leftIndexNode = new IndexNode();
+        IndexNode rightIndexNode=new IndexNode();
+
+        // Find the index to split the keys
+        int splitIndex = indexNode.getAllKeys().size() / 2;
+
+        // Move half of the keys from the original index node to the new index node
+        List<Integer> originalKeys = indexNode.getAllKeys();
+        List<Integer> leftIndexNodeKeys = new ArrayList<>(originalKeys.subList(0, splitIndex));
+        List<Integer> rightIndexNodeKeys = new ArrayList<>(originalKeys.subList(splitIndex+1, originalKeys.size()));
+        leftIndexNode.setKeys(leftIndexNodeKeys);
+        rightIndexNode.setKeys(rightIndexNodeKeys);
+
+        // Update pointers of the index nodes
+        List<MandyTree.Node> pointers= indexNode.getAllPointer();
+        List<MandyTree.Node> leftIndexNodePointers = new ArrayList<>(pointers.subList(0, splitIndex+1));
+        List<MandyTree.Node> rightIndexNodePointers = new ArrayList<>(pointers.subList(splitIndex+1, originalKeys.size()+1));
+        leftIndexNode.setPointers(leftIndexNodePointers);
+        rightIndexNode.setPointers(rightIndexNodePointers);
+
+        // set parents of each leaf nodes
+        leftIndexNodePointers.forEach((item)->item.setParent(leftIndexNode));
+        rightIndexNodePointers.forEach((item)->item.setParent(rightIndexNode));
+
+        return new IndexNode[]{leftIndexNode,rightIndexNode};
+    }
 
     /**
      * Delete a key from the tree starting from root
@@ -223,6 +274,7 @@ public class MandyTree implements BTree {
             for (int i = 0; i < indexNode.getKeyCount() + 1; i++) {
                 printTree(indexNode.getChild(i));
             }
+            System.out.println();
         }
     }
 
@@ -230,6 +282,9 @@ public class MandyTree implements BTree {
     public void load(String datafilename) {
         String[] readLines = readFile.readData(datafilename);
         //Fill in you work here
+        for(int i=0; i<readLines.length;i++){
+            insert(Integer.parseInt(readLines[i]));
+        }
 
     }
     
