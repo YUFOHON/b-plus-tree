@@ -95,17 +95,20 @@ public class MandyTree implements BTree {
                     newRootNode.addChild(0, leaf);
                     newRootNode.addChild(1, newLeafNode);
                     root = newRootNode;
+                    leaf.setParent(root);
+                    newLeafNode.setParent(root);
                 } else {
                     // Insert the new key into the parent index node
                     parent.insertKey(newLeafNode.getFirstLeafKey());
                     int insertionIndex = parent.getInsertionIndex(key);
-                    parent.setChild(insertionIndex, leaf);
-                    parent.setChild(insertionIndex + 1, newLeafNode);
-
+                    parent.setChild(insertionIndex-1, leaf);
+                    parent.setChild(insertionIndex, newLeafNode);
+                    newLeafNode.setParent(parent);
                     // Handle potential overflow of the parent index node
-                    if (parent.isOverflow(this.DEGREE)) {
+                    while(parent!=null && parent.isOverflow(this.DEGREE)) {
 //                        splitIndexNode(parent);
                         System.out.println("parent overflow");
+                        parent = (IndexNode) parent.getParent();
                     }
                 }
             } else {
@@ -116,6 +119,9 @@ public class MandyTree implements BTree {
         }
 
     }
+//    private IndexNode splitIndexNode(IndexNode parent){
+//        parent.
+//    }
 
     /**
      * Delete a key from the tree starting from root
@@ -205,13 +211,16 @@ public class MandyTree implements BTree {
 
         if (node.isLeafNode()) {
             LeafNode leafNode = (LeafNode) node;
+            System.out.print("[");
             leafNode.printNode();
+            System.out.print("]");
         } else {
             IndexNode indexNode = (IndexNode) node;
+            System.out.print("[");
             indexNode.printNode();
+            System.out.println("]");
 
             for (int i = 0; i < indexNode.getKeyCount() + 1; i++) {
-                System.out.println();
                 printTree(indexNode.getChild(i));
             }
         }

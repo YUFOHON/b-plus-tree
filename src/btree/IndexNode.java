@@ -80,10 +80,13 @@ import java.util.List;
 
     @Override
     public void setChild(int index, MandyTree.Node child) {
-        if (index >= 0 && index <= getKeyCount()) {
+        if (index >= 0 && index <= getKeyCount() && pointers.size()>index) {
             pointers.set(index, child);
+        }else{
+            pointers.add(index,child);
         }
     }
+
     /**
      * Given a pointer to a Node object and an integer index, this method
      * inserts the pointer at the specified index within the childPointers
@@ -105,7 +108,7 @@ import java.util.List;
                 System.out.print(", ");
             }
         }
-        System.out.println();
+
     }
     public int getInsertionIndex(Integer key) {
         int index = 0;
