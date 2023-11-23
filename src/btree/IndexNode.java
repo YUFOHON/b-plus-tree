@@ -130,5 +130,18 @@ import java.util.List;
         }
         return index;
     }
-
+    public int getPrevRedistributeKeyIndex(Integer key){
+        int index=keys.size()-1;
+        while(!(keys.get(index) <= key)){
+            index--;
+        }
+        return index;
+    }
+     public int getNextRedistributeKeyIndex(Integer key){
+         int index=0;
+         while(!(keys.get(index) > key)){
+             index++;
+         }
+         return index;
+     }
 }
