@@ -85,10 +85,16 @@ import java.util.List;
         }
         return null;
     }
+     public void removeChild(int index) {
+         if (index >= 0 && index < pointers.size()) {
+             pointers.remove(index);
+         }
+     }
 
-    @Override
+
+     @Override
     public void setChild(int index, MandyTree.Node child) {
-        if (index >= 0 && index <= getKeyCount() && pointers.size()>index) {
+        if (index >= 0 && index <= getKeyCount() && pointers.size()>index && (child==pointers.get(index))) {
             pointers.set(index, child);
         }else{
             pointers.add(index,child);
@@ -125,7 +131,7 @@ import java.util.List;
     }
     public int getInsertionIndex(Integer key) {
         int index = 0;
-        while (index < keys.size() && key.compareTo(keys.get(index)) > 0) {
+        while (index < keys.size() && key.compareTo(keys.get(index)) >= 0) {
             index++;
         }
         return index;

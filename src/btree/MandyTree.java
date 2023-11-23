@@ -85,12 +85,12 @@ public class MandyTree implements BTree {
                 // If the leaf node is full, split it and propagate the split upwards
                 System.out.println("overflow");
                 leaf.insertKey(key);
-                LeafNode newLeafNode = splitLeafNode((LeafNode) leaf);
+
                 IndexNode parent = (IndexNode) leaf.getParent();
 
                 if (parent == null) {
                     // If the root node is the leaf node, create a new root node
-
+                    LeafNode newLeafNode = splitLeafNode((LeafNode) leaf);
                     IndexNode newRootNode = new IndexNode();
                     newRootNode.insertKey(newLeafNode.getFirstLeafKey());
                     newRootNode.addChild(0, leaf);
@@ -99,38 +99,38 @@ public class MandyTree implements BTree {
                     leaf.setParent(root);
                     newLeafNode.setParent(root);
                 }
-//                else if(((LeafNode) leaf).getPrevious()!=null && !((LeafNode) leaf).getPrevious().isOverflow(DEGREE)) {
-//                    //if leafNode's previous have space, redistribute
-//                    System.out.println("redistribute to Previous");
-//                    LeafNode redistributeTarget=((LeafNode) leaf).getPrevious();
-//                    redistributeTarget.keys.add(leaf.keys.get(0));
-//                    leaf.keys.remove(leaf.keys.get(0));
-//                    int redistributeIndex=parent.getPrevRedistributeKeyIndex(leaf.keys.get(0));
-//                    parent.keys.set(redistributeIndex,leaf.keys.get(0));
-//
-//
-//                }
-//                else if(((LeafNode) leaf).getNext()!=null && !((LeafNode) leaf).getNext().isOverflow(DEGREE)) {
-//                    //if leafNode's previous have space, redistribute
-//                    System.out.println("redistribute to Next");
-//                    LeafNode redistributeTarget=((LeafNode) leaf).getNext();
-//                    redistributeTarget.keys.add(0,leaf.keys.get(leaf.keys.size()-1));
-//                    int redistributeIndex=parent.getNextRedistributeKeyIndex(leaf.keys.get(leaf.keys.size()-1));
-//                    parent.keys.set(redistributeIndex,leaf.keys.get(leaf.keys.size()-1));
-//                    leaf.keys.remove(leaf.keys.get(leaf.keys.size()-1));
-//
-//                }
+                else if(((LeafNode) leaf).getPrevious()!=null && !((LeafNode) leaf).getPrevious().isOverflow(DEGREE)) {
+                    //if leafNode's previous have space, redistribute
+                    System.out.println("redistribute to Previous");
+                    LeafNode redistributeTarget=((LeafNode) leaf).getPrevious();
+                    redistributeTarget.insertKey(leaf.keys.get(0));
+                    leaf.keys.remove(leaf.keys.get(0));
+                    int redistributeIndex=parent.getPrevRedistributeKeyIndex(leaf.keys.get(0));
+                    parent.keys.set(redistributeIndex,leaf.keys.get(0));
+
+
+                }
+                else if(((LeafNode) leaf).getNext()!=null && !((LeafNode) leaf).getNext().isOverflow(DEGREE)) {
+                    //if leafNode's previous have space, redistribute
+                    System.out.println("redistribute to Next");
+                    LeafNode redistributeTarget=((LeafNode) leaf).getNext();
+                    redistributeTarget.insertKey(leaf.keys.get(leaf.keys.size()-1));
+                    int redistributeIndex=parent.getNextRedistributeKeyIndex(leaf.keys.get(leaf.keys.size()-1));
+                    parent.keys.set(redistributeIndex,leaf.keys.get(leaf.keys.size()-1));
+                    leaf.keys.remove(leaf.keys.get(leaf.keys.size()-1));
+
+                }
                 else{
-
-
-
                     // Insert the new key into the parent index node
-
+                    LeafNode newLeafNode = splitLeafNode((LeafNode) leaf);
                     parent.insertKey(newLeafNode.getFirstLeafKey());
                     int insertionIndex = parent.getInsertionIndex(key);
                     parent.setChild(insertionIndex-1, leaf);
                     parent.setChild(insertionIndex, newLeafNode);
                     newLeafNode.setParent(parent);
+
+
+
                     // Handle potential overflow of the parent index node
                     while(parent!=null&&parent.isOverflow(this.DEGREE)) {
                         System.out.println("parent overflow");
@@ -138,6 +138,7 @@ public class MandyTree implements BTree {
                         int tempKey=parent.getAllKeys().get(splitIndex);
                         IndexNode[] indexNodeArray = splitIndexNode(parent);
                         if(parent.getParent()==null){
+                            //new root node
                             IndexNode newRootNode=new IndexNode();
                             newRootNode.insertKey(tempKey);
                             indexNodeArray[0].setParent(newRootNode);
@@ -151,9 +152,11 @@ public class MandyTree implements BTree {
                             grandParent.insertKey(tempKey);
                             indexNodeArray[0].setParent(grandParent);
                             indexNodeArray[1].setParent(grandParent);
-                            int index=grandParent.getAllKeys().size();
-                            grandParent.setChild(index-1,indexNodeArray[0]);
-                            grandParent.setChild(index,indexNodeArray[1]);
+                            int lastKeyOfIndexNode0=indexNodeArray[0].keys.get(indexNodeArray[0].keys.size()-1);
+                            int oInsertionIndex= grandParent.getInsertionIndex(lastKeyOfIndexNode0);
+                            grandParent.setChild(oInsertionIndex,indexNodeArray[0]);
+                            grandParent.removeChild(oInsertionIndex+1);
+                            grandParent.setChild(oInsertionIndex+1,indexNodeArray[1]);
 
                             parent = (IndexNode) parent.getParent();
                         }
@@ -320,7 +323,7 @@ public class MandyTree implements BTree {
         BTree mandyTree = new MandyTree(0.5, 4);
         //the value is stored in Config.java
         //build a mandyTree from the data file
-//        mandyTree.load(Config.dataFileName);
+        mandyTree.load(Config.dataFileName);
 
         //interact with the tree via a text interface.
         CLI.shell(mandyTree);
