@@ -277,35 +277,71 @@ public class MandyTree implements BTree {
             }
         }
     }
-    private void handleUnderflow(IndexNode underflowNode) {
-        IndexNode grandParentNode = (IndexNode) underflowNode.parent;
-        int underflowNodeIndex = grandParentNode.getAllPointer().indexOf(underflowNode);
-        //check if is same parent
-        if (underflowNodeIndex > 0) { // If underflowNode has a left sibling
-            IndexNode leftSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex - 1);
-
-            if (leftSibling.keys.size() > this.DEGREE/2) { // If redistribution is possible
-                redistribute_Index(underflowNode, leftSibling, true);
-            } else { // If redistribution is not possible
-                merge_Index(underflowNode, leftSibling, true);
-            }
-        } else if (underflowNodeIndex < grandParentNode.getAllPointer().size() - 1) { // If underflowNode has a right sibling
-            IndexNode rightSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex + 1);
-
-            if (rightSibling.keys.size() > this.DEGREE/2) { // If redistribution is possible
-                redistribute_Index(underflowNode, rightSibling, false);
-            } else { // If redistribution is not possible
-                merge_Index(underflowNode, rightSibling, false);
-            }
-        } else { // If underflowNode has no siblings (must be the root)
-            merge_Index(underflowNode, null, false);
-        }
-        // If the parent underflows as a result, handle it recursively
-//        if (grandParentNode.isUnderflow(this.DEGREE)) {
-//            handleUnderflow(grandParentNode);
+//    private void handleUnderflow(IndexNode underflowNode) {
+//        IndexNode grandParentNode = (IndexNode) underflowNode.parent;
+//        int underflowNodeIndex = grandParentNode.getAllPointer().indexOf(underflowNode);
+//        //check if is same parent
+//        if (underflowNodeIndex > 0) { // If underflowNode has a left sibling
+//            IndexNode leftSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex - 1);
+//
+//            if (leftSibling.keys.size() > this.DEGREE/2) { // If redistribution is possible
+//                redistribute_Index(underflowNode, leftSibling, true);
+//            } else { // If redistribution is not possible
+//                merge_Index(underflowNode, leftSibling, true);
+//            }
+//        } else if (underflowNodeIndex < grandParentNode.getAllPointer().size() - 1) { // If underflowNode has a right sibling
+//            IndexNode rightSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex + 1);
+//
+//            if (rightSibling.keys.size() > this.DEGREE/2) { // If redistribution is possible
+//                redistribute_Index(underflowNode, rightSibling, false);
+//            } else { // If redistribution is not possible
+//                merge_Index(underflowNode, rightSibling, false);
+//            }
+//        } else { // If underflowNode has no siblings (must be the root)
+//            merge_Index(underflowNode, null, false);
 //        }
+//        // If the parent underflows as a result, handle it recursively
+////        if (grandParentNode.isUnderflow(this.DEGREE)) {
+////            handleUnderflow(grandParentNode);
+////        }
+//    }
+private void handleUnderflow(IndexNode underflowNode) {
+    IndexNode grandParentNode = (IndexNode) underflowNode.parent;
+    int underflowNodeIndex = grandParentNode.getAllPointer().indexOf(underflowNode);
+
+    // Check if underflowNode has a left sibling
+    if (underflowNodeIndex > 0) {
+        IndexNode leftSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex - 1);
+
+        // If left sibling can redistribute
+        if (leftSibling.keys.size() > this.DEGREE / 2) {
+            redistribute_Index(underflowNode, leftSibling, true);
+            return;
+        }
     }
 
+    // Check if underflowNode has a right sibling
+    if (underflowNodeIndex < grandParentNode.getAllPointer().size() - 1) {
+        IndexNode rightSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex + 1);
+
+        // If right sibling can redistribute
+        if (rightSibling.keys.size() > this.DEGREE / 2) {
+            redistribute_Index(underflowNode, rightSibling, false);
+            return;
+        }
+    }
+
+    // If neither left nor right sibling can redistribute, then merge
+    if (underflowNodeIndex > 0) { // If there is a left sibling, merge with left
+        IndexNode leftSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex - 1);
+        merge_Index(underflowNode, leftSibling, true);
+    } else if (underflowNodeIndex < grandParentNode.getAllPointer().size() - 1) { // If there is a right sibling, merge with right
+        IndexNode rightSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex + 1);
+        merge_Index(underflowNode, rightSibling, false);
+    } else { // If underflowNode has no siblings (must be the root)
+        merge_Index(underflowNode, null, false);
+    }
+}
     private void redistribute(LeafNode underflowNode, LeafNode siblingNode, boolean isLeftSibling) {
         IndexNode parentNode = (IndexNode) underflowNode.parent;
         int underflowNodeIndex = parentNode.getAllPointer().indexOf(underflowNode);
@@ -409,7 +445,10 @@ public class MandyTree implements BTree {
             Integer separatingKey = parentNode.keys.get(underflowNodeIndex);
             underflowNode.keys.add(separatingKey);
             underflowNode.getAllPointer().add(borrowedChild);
+            //from the pointer of underflowNode, add the key from it's child
 
+            borrowedChild.parent=underflowNode;
+            // set al the child
             // Move the borrowed key up to the parent
             parentNode.keys.set(underflowNodeIndex, borrowedKey);
         }
