@@ -320,7 +320,7 @@ public class MandyTree implements BTree {
     
     public static void main(String[] args) {
         //we hardcode the fill factor and degree for this project
-        BTree mandyTree = new MandyTree(0.5, 4);
+        BTree mandyTree = new MandyTree(0.5, 2);
         //the value is stored in Config.java
         //build a mandyTree from the data file
         mandyTree.load(Config.dataFileName);
