@@ -576,7 +576,7 @@ private void handleUnderflow(IndexNode underflowNode) {
                 i++;
             }
             // The last child could also have keys in the range
-            if (i < node.keys.size()) {
+            if (i <= node.keys.size()) {
                 searchRecursive(node.getChild(i), key1, key2, result);
             }
         }
@@ -671,7 +671,7 @@ private void handleUnderflow(IndexNode underflowNode) {
 
 
 
-        mandyTree.printTree();
+//        mandyTree.printTree();
         //interact with the tree via a text interface.
         CLI.shell(mandyTree);
 

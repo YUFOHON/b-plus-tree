@@ -201,7 +201,7 @@ public class CLI {
         }
 
         String queriesFileName = tokens[1];
-        String[] stringArray = readFile.readData(queriesFileName);
+        String[] stringArray = readFile.readData(Config.queriesFileName);
         try {
 
             //Do the search
@@ -214,7 +214,7 @@ public class CLI {
                         new Integer(words[1]));
 
                 if (result.isEmpty()) {
-                    System.out.println("No result for range " + tokens[1] + " - " + tokens[2]);
+                    System.out.println("No result for range " + words[0] + " - " + words[1]);
                     return;
                 }
                 if (!gradingMode) {
