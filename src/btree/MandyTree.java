@@ -540,9 +540,47 @@ private void handleUnderflow(IndexNode underflowNode) {
      * @return List of keys
      */
     public List<Integer> search(Integer key1, Integer key2) {
-        return (new ArrayList<Integer>());
+        // Create an empty list to store the result
+        ArrayList<Integer> result = new ArrayList<>();
+        // If the tree is empty, return the empty list
+        if (root == null) {
+            return result;
+        }
+
+        // Start searching from the root node
+        searchRecursive(root, key1, key2, result);
+        return result;
     }
 
+    private void searchRecursive(Node node, Integer key1, Integer key2, ArrayList<Integer> result) {
+        // Check if the node is a leaf node
+        if (node.isLeafNode()) {
+            // In a leaf node, simply add all keys in the range to the result
+            for (Integer key : node.keys) {
+                if (key >= key1 && key <= key2) {
+                    result.add(key);
+                }
+            }
+        } else {
+            // In an inner node, use binary search to find the first key >= key1
+            int i = Collections.binarySearch(node.keys, key1);
+            if (i < 0) {
+                i = -i - 1; // key1 not found, so start from the next greater key
+            }
+            // Iterate over all keys and children in the range
+            while (i < node.keys.size() && node.keys.get(i) <= key2) {
+                searchRecursive(node.getChild(i), key1, key2, result);
+//                if (node.keys.get(i) >= key1) {
+//                    result.add(node.keys.get(i));
+//                }
+                i++;
+            }
+            // The last child could also have keys in the range
+            if (i < node.keys.size()) {
+                searchRecursive(node.getChild(i), key1, key2, result);
+            }
+        }
+    }
     private LeafNode findLeafNode(Integer key) {
         Node currentNode = root;
 
@@ -614,22 +652,22 @@ private void handleUnderflow(IndexNode underflowNode) {
     
     public static void main(String[] args) {
         //we hardcode the fill factor and degree for this project
-        BTree mandyTree = new MandyTree(0.5, 2);
+        BTree mandyTree = new MandyTree(0.5, 8);
         //the value is stored in Config.java
         //build a mandyTree from the data file
         mandyTree.load(Config.dataFileName);
         //delete 110 120 130 46 80 5 23 31 45 28 100
-        mandyTree.delete(110);
-        mandyTree.delete(120);
-        mandyTree.delete(130);
-        mandyTree.delete(46);
-        mandyTree.delete(80);
-        mandyTree.delete(5);
-        mandyTree.delete(23);
-        mandyTree.delete(31);
-        mandyTree.delete(45);
-        mandyTree.delete(28);
-        mandyTree.delete(100);
+//        mandyTree.delete(110);
+//        mandyTree.delete(120);
+//        mandyTree.delete(130);
+//        mandyTree.delete(46);
+//        mandyTree.delete(80);
+//        mandyTree.delete(5);
+//        mandyTree.delete(23);
+//        mandyTree.delete(31);
+//        mandyTree.delete(45);
+//        mandyTree.delete(28);
+//        mandyTree.delete(100);
 
 
 
