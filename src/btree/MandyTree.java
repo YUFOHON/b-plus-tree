@@ -654,13 +654,13 @@ private void handleUnderflow(IndexNode underflowNode) {
         }
 
         // Create a prefix String of spaces for indentation
-        String prefix = String.join("", Collections.nCopies(level, "  "));
+        String prefix = String.join("", Collections.nCopies(level, "   "));
 
         // Create a label for leaf or index node
-        String nodeLabel = node.isLeafNode() ? "Leaf" : "Index";
-
+        String nodeLabel = node.isLeafNode() ? "Leaf" :node==root?"Root": "Index";
+        String connection = node.isLeafNode() ? "___ " :node==root?"": "|___";
         // Print node type, level, and keys
-        System.out.println(prefix + nodeLabel + " Node (Level " + level + "): " + node.keys);
+        System.out.println(prefix +connection+ nodeLabel + " Node (Level " + level + "): " + node.keys);
 
         if (!node.isLeafNode()) {
             IndexNode indexNode = (IndexNode) node;
