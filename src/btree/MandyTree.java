@@ -595,15 +595,60 @@ private void handleUnderflow(IndexNode underflowNode) {
     /**
      * Print statistics of the current tree
      */
-    @Override
     public void dumpStatistics() {
+        int maxKeysPerNode = this.DEGREE; // Set this to your B+ Tree's maximum number of keys per node
+
+        if (root == null) {
+            System.out.println("The B+ Tree is empty.");
+            return;
+        }
+
+        int totalNodes = 0;
+        int totalDataEntries = 0;
+        int totalIndexEntries = 0;
+        int totalKeys = 0;
+        int height = 0;
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+            totalNodes++;
+            Node node = queue.poll();
+
+            if (node.isLeafNode()) {
+                totalDataEntries += node.keys.size();
+            } else {
+                IndexNode indexNode = (IndexNode) node;
+                totalIndexEntries += indexNode.keys.size();
+                queue.addAll(indexNode.getAllPointer());
+            }
+
+            totalKeys += node.keys.size();
+            height = Math.max(height, getDepth(root));
+        }
+
+        double avgFillFactor = ((double) totalKeys) / (totalNodes * maxKeysPerNode) * 100;
+
         System.out.println("Statistics of the B+ Tree:");
-        System.out.println("Total number of nodes: ");
-        System.out.println("Total number of data entries: ");
-        System.out.println("Total number of index entries: ");
-        System.out.print("Average fill factor: ");
-        System.out.println("%");
-        System.out.println("Height of tree: ");
+        System.out.println("Total number of nodes: " + totalNodes);
+        System.out.println("Total number of data entries: " + totalDataEntries);
+        System.out.println("Total number of index entries: " + totalIndexEntries);
+        System.out.printf("Average fill factor: %.2f %%\n", avgFillFactor);
+        System.out.println("Height of tree: " + height);
+    }
+
+    private int getDepth(Node node) {
+        if (node.isLeafNode()) {
+            return 1;
+        } else {
+            int maxDepth = 0;
+            IndexNode indexNode = (IndexNode) node;
+            for (Node child : indexNode.getAllPointer()) {
+                maxDepth = Math.max(maxDepth, getDepth(child));
+            }
+            return maxDepth + 1;
+        }
     }
     /**
      * Print tree from root
