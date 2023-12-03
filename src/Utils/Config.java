@@ -3,7 +3,7 @@ package Utils;
 // put all settings in one class so that we can easily modify them.
 // modify your settings in a configuration class
 public class Config {
-    public static String dataFileName = "C:\\Users\\user\\Desktop\\b-plus-tree-main\\data\\data.txt";
+    public static String dataFileName = "C:\\Users\\user\\Desktop\\b-plus-tree-main\\data\\data2.txt";
     public static String updatesFileName = "C:\\Users\\user\\Desktop\\b-plus-tree-main\\data\\updates.txt";
     public static String queriesFileName = "C:\\Users\\user\\Desktop\\b-plus-tree-main\\data\\queries.txt";
 

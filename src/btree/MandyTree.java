@@ -608,38 +608,67 @@ private void handleUnderflow(IndexNode underflowNode) {
     /**
      * Print tree from root
      */
+//    public void printTree() {
+//        printTree(root);
+//    }
+//
+//    /**
+//     * Print tree from node
+//     * @param node starting node to print
+//     */
+//    public void printTree(Node node) {
+//        if (node == null) {
+//            System.out.println("Empty tree");
+//            return;
+//        }
+//
+//        if (node.isLeafNode()) {
+//            LeafNode leafNode = (LeafNode) node;
+//            System.out.print("[");
+//            leafNode.printNode();
+//            System.out.print("]");
+//        } else {
+//            IndexNode indexNode = (IndexNode) node;
+//            System.out.print("[");
+//            indexNode.printNode();
+//            System.out.println("]");
+//
+//            for (int i = 0; i < indexNode.getKeyCount() + 1; i++) {
+//                printTree(indexNode.getChild(i));
+//            }
+//            System.out.println();
+//        }
+//    }
     public void printTree() {
-        printTree(root);
+        printTree(root,0);
     }
 
     /**
      * Print tree from node
      * @param node starting node to print
      */
-    public void printTree(Node node) {
+    public void printTree(Node node, int level) {
         if (node == null) {
             System.out.println("Empty tree");
             return;
         }
 
-        if (node.isLeafNode()) {
-            LeafNode leafNode = (LeafNode) node;
-            System.out.print("[");
-            leafNode.printNode();
-            System.out.print("]");
-        } else {
-            IndexNode indexNode = (IndexNode) node;
-            System.out.print("[");
-            indexNode.printNode();
-            System.out.println("]");
+        // Create a prefix String of spaces for indentation
+        String prefix = String.join("", Collections.nCopies(level, "  "));
 
+        // Create a label for leaf or index node
+        String nodeLabel = node.isLeafNode() ? "Leaf" : "Index";
+
+        // Print node type, level, and keys
+        System.out.println(prefix + nodeLabel + " Node (Level " + level + "): " + node.keys);
+
+        if (!node.isLeafNode()) {
+            IndexNode indexNode = (IndexNode) node;
             for (int i = 0; i < indexNode.getKeyCount() + 1; i++) {
-                printTree(indexNode.getChild(i));
+                printTree(indexNode.getChild(i), level + 1); // Increase level for child nodes
             }
-            System.out.println();
         }
     }
-
     @Override
     public void load(String datafilename) {
         String[] readLines = readFile.readData(datafilename);
@@ -652,7 +681,7 @@ private void handleUnderflow(IndexNode underflowNode) {
     
     public static void main(String[] args) {
         //we hardcode the fill factor and degree for this project
-        BTree mandyTree = new MandyTree(0.5, 8);
+        BTree mandyTree = new MandyTree(0.5, 4);
         //the value is stored in Config.java
         //build a mandyTree from the data file
         mandyTree.load(Config.dataFileName);
@@ -668,10 +697,7 @@ private void handleUnderflow(IndexNode underflowNode) {
 //        mandyTree.delete(45);
 //        mandyTree.delete(28);
 //        mandyTree.delete(100);
-
-
-
-//        mandyTree.printTree();
+        mandyTree.printTree();
         //interact with the tree via a text interface.
         CLI.shell(mandyTree);
 
