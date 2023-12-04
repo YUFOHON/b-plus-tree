@@ -101,7 +101,7 @@ public class MandyTree implements BTree {
                 }
                 else if(((LeafNode) leaf).getPrevious()!=null && !((LeafNode) leaf).getPrevious().isOverflow(DEGREE)) {
                     //if leafNode's previous have space, redistribute
-                    System.out.println("redistribute to Previous");
+                    System.out.println("redistribute from Previous");
                     LeafNode redistributeTarget=((LeafNode) leaf).getPrevious();
                     redistributeTarget.insertKey(leaf.keys.get(0));
                     leaf.keys.remove(leaf.keys.get(0));
@@ -112,7 +112,7 @@ public class MandyTree implements BTree {
                 }
                 else if(((LeafNode) leaf).getNext()!=null && !((LeafNode) leaf).getNext().isOverflow(DEGREE)) {
                     //if leafNode's previous have space, redistribute
-                    System.out.println("redistribute to Next");
+                    System.out.println("redistribute from Next");
                     LeafNode redistributeTarget=((LeafNode) leaf).getNext();
                     redistributeTarget.insertKey(leaf.keys.get(leaf.keys.size()-1));
                     int redistributeIndex=parent.getNextRedistributeKeyIndex(leaf.keys.get(leaf.keys.size()-1));
@@ -211,6 +211,26 @@ public class MandyTree implements BTree {
         return new IndexNode[]{leftIndexNode,rightIndexNode};
     }
 
+
+    public void updateParentKey(LeafNode node,Integer deletedKey) {
+        if (node.parent != null) {
+            IndexNode parent = (IndexNode) node.parent;
+            IndexNode grandParent = (IndexNode) parent.parent;
+            // also update the key in parent node
+            if (grandParent != null && grandParent.getAllKeys().contains(deletedKey)) {
+                //if grandParent have the deleted key, update the key in grandParent
+                int index = grandParent.getAllKeys().indexOf(deletedKey);
+                grandParent.keys.set(index, node.getFirstLeafKey());
+            }
+//            grandParent.keys.set(grandParent.getAllPointer().indexOf(parent)-1, node.getFirstLeafKey());
+
+            int index = parent.getAllPointer().indexOf(node);
+            if (index > 0) {
+                node.parent.keys.set(index - 1, node.keys.get(0));
+            }
+        }
+    }
+
     /**
      * Delete a key from the tree starting from root
      * @param key key to be deleted
@@ -245,7 +265,7 @@ public class MandyTree implements BTree {
 
                     if(leftNode!=null && !leftNode.isUnderflow(this.DEGREE) && leftNode.keys.size()>this.DEGREE/2){
                         //redistribute
-                        System.out.println("redistribute to Previous");
+                        System.out.println("redistribute from Previous");
                         redistribute(node, node.getPrevious(), true);
                     }else if(rightNode!=null && !rightNode.isUnderflow(this.DEGREE) && rightNode.keys.size()>this.DEGREE/2 ){
                         //redistribute
@@ -264,48 +284,11 @@ public class MandyTree implements BTree {
                     }
 
                 }
-                else updateParentKey(node);
+                else updateParentKey(node,key);
             }
         }
     }
-    public void updateParentKey(LeafNode node) {
-        if (node.parent != null) {
-            IndexNode parent = (IndexNode) node.parent;
-            int index = parent.getAllPointer().indexOf(node);
-            if (index > 0) {
-                node.parent.keys.set(index - 1, node.keys.get(0));
-            }
-        }
-    }
-//    private void handleUnderflow(IndexNode underflowNode) {
-//        IndexNode grandParentNode = (IndexNode) underflowNode.parent;
-//        int underflowNodeIndex = grandParentNode.getAllPointer().indexOf(underflowNode);
-//        //check if is same parent
-//        if (underflowNodeIndex > 0) { // If underflowNode has a left sibling
-//            IndexNode leftSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex - 1);
-//
-//            if (leftSibling.keys.size() > this.DEGREE/2) { // If redistribution is possible
-//                redistribute_Index(underflowNode, leftSibling, true);
-//            } else { // If redistribution is not possible
-//                merge_Index(underflowNode, leftSibling, true);
-//            }
-//        } else if (underflowNodeIndex < grandParentNode.getAllPointer().size() - 1) { // If underflowNode has a right sibling
-//            IndexNode rightSibling = (IndexNode) grandParentNode.getAllPointer().get(underflowNodeIndex + 1);
-//
-//            if (rightSibling.keys.size() > this.DEGREE/2) { // If redistribution is possible
-//                redistribute_Index(underflowNode, rightSibling, false);
-//            } else { // If redistribution is not possible
-//                merge_Index(underflowNode, rightSibling, false);
-//            }
-//        } else { // If underflowNode has no siblings (must be the root)
-//            merge_Index(underflowNode, null, false);
-//        }
-//        // If the parent underflows as a result, handle it recursively
-////        if (grandParentNode.isUnderflow(this.DEGREE)) {
-////            handleUnderflow(grandParentNode);
-////        }
-//    }
-private void handleUnderflow(IndexNode underflowNode) {
+    private void handleUnderflow(IndexNode underflowNode) {
     IndexNode grandParentNode = (IndexNode) underflowNode.parent;
     int underflowNodeIndex = grandParentNode.getAllPointer().indexOf(underflowNode);
 
@@ -400,6 +383,10 @@ private void handleUnderflow(IndexNode underflowNode) {
 
             // Remove the separating key from the parent and the siblingNode from the children
             parentNode.keys.remove(underflowNodeIndex);
+
+            //also update the key in parent node
+            parentNode.parent.keys.set(underflowNodeIndex, siblingNode.keys.get(0));
+
             parentNode.deletePointer(underflowNodeIndex + 1);
             if (siblingNode.getNext() != null) {
                 siblingNode.getNext().setPrevious(underflowNode);
@@ -653,37 +640,7 @@ private void handleUnderflow(IndexNode underflowNode) {
     /**
      * Print tree from root
      */
-//    public void printTree() {
-//        printTree(root);
-//    }
-//
-//    /**
-//     * Print tree from node
-//     * @param node starting node to print
-//     */
-//    public void printTree(Node node) {
-//        if (node == null) {
-//            System.out.println("Empty tree");
-//            return;
-//        }
-//
-//        if (node.isLeafNode()) {
-//            LeafNode leafNode = (LeafNode) node;
-//            System.out.print("[");
-//            leafNode.printNode();
-//            System.out.print("]");
-//        } else {
-//            IndexNode indexNode = (IndexNode) node;
-//            System.out.print("[");
-//            indexNode.printNode();
-//            System.out.println("]");
-//
-//            for (int i = 0; i < indexNode.getKeyCount() + 1; i++) {
-//                printTree(indexNode.getChild(i));
-//            }
-//            System.out.println();
-//        }
-//    }
+
     public void printTree() {
         printTree(root,0);
     }
@@ -726,7 +683,7 @@ private void handleUnderflow(IndexNode underflowNode) {
     
     public static void main(String[] args) {
         //we hardcode the fill factor and degree for this project
-        BTree mandyTree = new MandyTree(0.5, 4);
+        BTree mandyTree = new MandyTree(0.5, 8);
         //the value is stored in Config.java
         //build a mandyTree from the data file
         mandyTree.load(Config.dataFileName);
@@ -742,9 +699,18 @@ private void handleUnderflow(IndexNode underflowNode) {
 //        mandyTree.delete(45);
 //        mandyTree.delete(28);
 //        mandyTree.delete(100);
+//        mandyTree.delete(40);
+//        mandyTree.delete(55);
+//        mandyTree.delete(30);
+
+
         mandyTree.printTree();
+        mandyTree.dumpStatistics();
         //interact with the tree via a text interface.
         CLI.shell(mandyTree);
 
     }
 }
+
+// describe the The data structures and algorithms used in the implementation of delete operation
+

@@ -36,6 +36,7 @@ public class CLI {
                 case "delete":
                     deleteCommand(tokens, bTree);
                     printCommand(new String[]{"print"}, bTree);
+                    statsCommand(new String[]{"stats"}, bTree);
                     break;
                 case "search":
                     searchCommand(tokens, bTree);
